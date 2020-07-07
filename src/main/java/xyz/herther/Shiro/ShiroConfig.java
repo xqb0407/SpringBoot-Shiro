@@ -28,21 +28,21 @@ public class ShiroConfig {
         /**
          *Shiro内置过滤器，可以实现权限相关拦截
          * 常用的过滤器：
-         * anno：无需认证（登录可以访问）
+         * anon：无需认证（登录可以访问）
          * authc：必须认证才可以访问
          * user：如果使用rememberMe的功能才可以直接访问
          * role：该资源必须得到角色的权限才可以访问
          */
         Map<String, String> filterMap=new LinkedHashMap<String,String>();
-//        filterMap.put("/add","authc");
-//        filterMap.put("/update", "authc");
-        filterMap.put("/*","authc");
-        //部分拦截
-        filterMap.put("/hello", "anno");
-
-        //修改登录页面
-        shiroFilterFactoryBean.setLoginUrl("tologin");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterMap);
+        //filterMap.put("/add","authc");
+        //filterMap.put("/update", "authc");
+        //filterMap.put("/tologin","anon");
+        //filterMap.put("/","anon");
+        filterMap.put("/login", "anon");
+        //修改登录页面
+        filterMap.put("/*","authc");
+        shiroFilterFactoryBean.setLoginUrl("/tologin");
         return shiroFilterFactoryBean;
     }
 

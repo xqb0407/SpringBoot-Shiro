@@ -344,12 +344,9 @@ public class UserReaml extends AuthorizingRealm {
 ```java
 package xyz.herther.controller;
 
-import com.sun.net.httpserver.HttpsServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 测试页面
