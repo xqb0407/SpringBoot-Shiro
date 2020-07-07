@@ -192,21 +192,20 @@ public class ShiroConfig {
         /**
          *Shiro内置过滤器，可以实现权限相关拦截
          * 常用的过滤器：
-         * anno：无需认证（登录可以访问）
+         * anon：无需认证（登录可以访问）
          * authc：必须认证才可以访问
          * user：如果使用rememberMe的功能才可以直接访问
          * role：该资源必须得到角色的权限才可以访问
          */
         Map<String, String> filterMap=new LinkedHashMap<String,String>();
-//        filterMap.put("/add","authc");
-//        filterMap.put("/update", "authc");
-        filterMap.put("/*","authc");
-        //部分拦截
-        filterMap.put("/hello", "anno");
-
-        //修改登录页面
-        shiroFilterFactoryBean.setLoginUrl("tologin");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterMap);
+        //filterMap.put("/add","authc");
+        //filterMap.put("/update", "authc");
+        //filterMap.put("/tologin","anon");
+        filterMap.put("/","anon");
+        //修改登录页面
+        filterMap.put("/*","authc");
+        shiroFilterFactoryBean.setLoginUrl("/tologin");
         return shiroFilterFactoryBean;
     }
 
@@ -230,6 +229,7 @@ public class ShiroConfig {
     }
 
 }
+
 
 ```
 
@@ -339,14 +339,15 @@ public class UserReaml extends AuthorizingRealm {
 
 **TestController.class**
 
-
-
 ```java
 package xyz.herther.controller;
 
+import com.sun.net.httpserver.HttpsServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 测试页面
@@ -379,6 +380,106 @@ public class TestController {
     @GetMapping("/tologin")
     public String login(){
         return "/login";
+    }
+}
+
+```
+
+##### 四、实现用户认证登录操作
+
+**编写控制层代码**
+
+```JAVA
+@PostMapping("/login")
+    public String login(String username,String passowrd,Model model) {
+        System.out.println("username：" + username + "password：" + passowrd);
+        /**
+         * shiro编写认证操作
+         */
+        //1、获取subject
+        Subject subject = SecurityUtils.getSubject();
+        //2、封装用户数据
+        UsernamePasswordToken token = new UsernamePasswordToken(username, passowrd);
+        //3、执行登录方法
+        try {
+            subject.login(token);
+            return "redirect:/index";
+        } catch (UnknownAccountException e) {
+            model.addAttribute("msg", "用户名不存在");
+            return "login";
+        } catch (IncorrectCredentialsException e) {
+            model.addAttribute("msg","用户名密码错误");
+            return "login";
+        }
+
+    }
+```
+
+**编写html页面**
+
+```HTML
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>登录</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <form action="login" method="post" class="login-form">
+        <h2>登录</h2>
+        <input type="text" name="username" placeholder="用户名"/>
+        <input type="password" name="password" placeholder="密码">
+        <button type="submit">登录</button>
+    </form>
+    <h5 th:text="${msg}" style="color: #4186D3"></h5>
+</div>
+
+
+</body>
+</html>
+<script>
+
+</script>
+
+```
+
+**编写Reaml的认证逻辑**
+
+```java
+package xyz.herther.Shiro;
+
+import org.apache.shiro.authc.*;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
+
+public class UserReaml extends AuthorizingRealm {
+    //获取授权信息
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        System.out.println("获取授权信息");
+        return null;
+    }
+    //获取身份验证
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        System.out.println("执行认证操作");
+        //假设数据库用户名密码
+        String username= "admin";
+        String password ="123";
+        UsernamePasswordToken token = (UsernamePasswordToken)authenticationToken;
+//        1、判断用户名
+        if (!token.getUsername().equals(username)){
+            //用户名不存在
+            return null;    //shiro的底层会抛出UnknowAcountException
+        }
+        //2、判断密密码
+        //返回new一个子类 第一参数是返回subject的一些消息可以为空，第二个参数是数据的用户的密码， 第三个是shiro的名字
+        return new SimpleAuthenticationInfo("",password,"");
     }
 }
 
