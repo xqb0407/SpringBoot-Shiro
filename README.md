@@ -485,3 +485,255 @@ public class UserReaml extends AuthorizingRealm {
 
 ```
 
+###    六、整合mybatis实现登录
+
+#### **一、引入jar包**
+
+```php+HTML
+ <!--引入数据库连接池-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.1.12</version>
+        </dependency>
+        <!--引入springboot-mybatis启动器-->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+```
+
+#### **二、配置application.yml**
+
+```properties
+#mysql
+spring:
+  datasource:
+    #mysql配置
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/springboot_shiro?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    username: root
+    password: 123456
+    #引入Druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+```
+
+配置mybatis
+
+```properties
+mybatis:
+  type-aliases-package: com.xyz.herther.pojo
+```
+
+
+
+#### 三、创建数据库为springboot_shiro
+
+##### 	建立user表
+
+```sql
+CREATE TABLE USER(
+	id int PRIMARY key AUTO_INCREMENT,
+	username VARCHAR(20),
+	password VARCHAR(50)
+);
+```
+
+#### 四、创建user实体类
+
+```java
+package xyz.herther.pojo;
+
+public class User {
+    private int id;
+    private String username;
+    private String password;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
+
+    public User(int id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+    public User(int id) {
+        this.id = id;
+    }
+    public User() {
+    }
+}
+
+```
+
+#### 五、创建mapper接口和映射文件
+
+**mapper接口**
+
+```java
+package xyz.herther.Mapper;
+
+import xyz.herther.pojo.User;
+
+public interface UserMapper {
+    public User findByname(String username);
+}
+
+```
+
+**创建一个mapper接口映射文件**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.herther.mapper.UserMapper">
+    <select id="findByName" parameterType="string" resultSetType="user"/>
+    SELECT ID,
+        USERNAME,
+        PASSWORD
+        FROM user WHERE username=#{value}
+</mapper>
+```
+
+#### 六、编写Service层
+
+​	**编写UserService**
+
+```java
+package xyz.herther.service;
+
+import xyz.herther.pojo.User;
+
+public interface UserService {
+    public User findByName(String username);
+}
+
+```
+
+**编写实现类UserServuceImpl**
+
+```java
+package xyz.herther.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import xyz.herther.Mapper.UserMapper;
+import xyz.herther.pojo.User;
+import xyz.herther.service.UserService;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public User findByName(String username) {
+        return null;
+    }
+}
+
+```
+
+**修改启动类SpringbootShiroApplication**
+
+```java
+package xyz.herther;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+@MapperScan("xyz.herther.Mapper")
+public class SpringbootShiroApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringbootShiroApplication.class, args);
+    }
+
+}
+
+```
+
+#### 七、改造UserReaml
+
+```java
+package xyz.herther.Shiro;
+
+import org.apache.shiro.authc.*;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.beans.factory.annotation.Autowired;
+import xyz.herther.pojo.User;
+import xyz.herther.service.UserService;
+
+public class UserReaml extends AuthorizingRealm {
+    //注入Service层
+    @Autowired
+    UserService userService;
+
+
+    //获取授权信息
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        System.out.println("获取授权信息");
+        return null;
+    }
+    //获取身份验证
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        System.out.println("执行认证操作");
+        //假设数据库用户名密码
+
+        UsernamePasswordToken token = (UsernamePasswordToken)authenticationToken;
+        User user = userService.findByName(token.getUsername());
+
+//        1、判断用户名
+        if (user==null){
+            //用户名不存在
+            return null;    //shiro的底层会抛出UnknowAcountException
+        }
+        //2、判断密密码
+        //返回new一个子类 第一参数是返回subject的一些消息可以为空，第二个参数是数据的用户的密码， 第三个是shiro的名字
+        return new SimpleAuthenticationInfo("",user.getPassword(),"");
+    }
+}
+
+```
+
+
+
