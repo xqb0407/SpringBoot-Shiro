@@ -31,18 +31,22 @@ public class ShiroConfig {
          * anon：无需认证（登录可以访问）
          * authc：必须认证才可以访问
          * user：如果使用rememberMe的功能才可以直接访问
+         * perms:该资源必须得到权限才能访问
          * role：该资源必须得到角色的权限才可以访问
          */
         Map<String, String> filterMap=new LinkedHashMap<String,String>();
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterMap);
-        //filterMap.put("/add","authc");
-        //filterMap.put("/update", "authc");
-        //filterMap.put("/tologin","anon");
-        //filterMap.put("/","anon");
+        //登录页面无需认证
         filterMap.put("/login", "anon");
+        //add资源必须得到权限才能访问
+        filterMap.put("/add", "perms[user:add]");
         //修改登录页面
         filterMap.put("/*","authc");
+
         shiroFilterFactoryBean.setLoginUrl("/tologin");
+        //add资源必须得到权限才能访问
+        shiroFilterFactoryBean.setUnauthorizedUrl("/unAuth");
+
         return shiroFilterFactoryBean;
     }
 

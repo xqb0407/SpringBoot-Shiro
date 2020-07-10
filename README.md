@@ -735,5 +735,57 @@ public class UserReaml extends AuthorizingRealm {
 
 ```
 
+### 七、实现有权限才能访问
 
+**perms:该资源必须得到权限才能访问**
+
+**1、添加ShiroConfig.class**
+
+```java
+//add资源必须得到权限才能访问
+filterMap.put("/add", "perms[user:add]");
+ //add资源必须得到权限才能访问
+shiroFilterFactoryBean.setUnauthorizedUrl("/unAuth");
+```
+
+**2、编写unAuth.html页面**
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>权限不足</title>
+</head>
+<body>
+        <h1 style="color: red">对不起你权限不足</h1>
+</body>
+</html>
+```
+
+**3、编写TestController**
+
+```java
+@GetMapping("/unAuth")
+public String unAuth(){
+    return "/unAuth";
+}
+```
+
+### 八、完成shiro的资源授权
+
+**1、编写UserReaml.class**
+
+```java
+//获取授权信息
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+    System.out.println("获取授权信息");
+    //给资源进行授权
+    SimpleAuthorizationInfo info =new SimpleAuthorizationInfo();
+    //添加字符串权限
+    info.addStringPermission("user:add");
+    return info;
+}
+```
 

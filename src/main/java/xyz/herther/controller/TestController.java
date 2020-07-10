@@ -63,8 +63,9 @@ public class TestController {
         UsernamePasswordToken token = new UsernamePasswordToken(username,password);
         //3、执行登录方法
         try {
+            System.out.println("用户名："+token.getUsername()+"密码: "+token.getPassword());
             subject.login(token);
-            model.addAttribute("username",username);
+            model.addAttribute("username",token.getUsername());
             return "/index";
         } catch (UnknownAccountException e) {
             model.addAttribute("msg", "用户名不存在");
@@ -74,5 +75,9 @@ public class TestController {
             return "login";
         }
 
+    }
+    @GetMapping("/unAuth")
+    public String unAuth(){
+        return "/unAuth";
     }
 }

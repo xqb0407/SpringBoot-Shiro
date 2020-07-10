@@ -2,6 +2,7 @@ package xyz.herther.Shiro;
 
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +17,27 @@ public class UserReaml extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         System.out.println("获取授权信息");
-        return null;
+        //给资源进行授权
+        SimpleAuthorizationInfo info =new SimpleAuthorizationInfo();
+        //添加字符串权限
+        info.addStringPermission("user:add");
+        return info;
     }
     //注入Service层
     @Autowired
     private UserService userService;
+
     //获取身份验证
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken arg0) throws AuthenticationException {
         System.out.println("执行认证操作");
 
         UsernamePasswordToken token = (UsernamePasswordToken)arg0;
+        System.out.println("UserReaml层:"+token.getUsername());
+
         User user = userService.findByName(token.getUsername());
 //        1、判断用户名
-        System.out.println(user.toString());
-
+       // System.out.println(user.toString());
         if (user==null){
             //用户名不存在
             return null;    //shiro的底层会抛出UnknowAcountException
