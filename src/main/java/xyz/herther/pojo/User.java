@@ -1,5 +1,10 @@
 package xyz.herther.pojo;
 
+/**
+ * Herther
+ * 2020/7/8
+ * 实体类
+ */
 public class User {
     private int id;
     private String username;

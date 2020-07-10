@@ -6,6 +6,11 @@ import xyz.herther.dao.UserMapper;
 import xyz.herther.pojo.User;
 import xyz.herther.service.UserService;
 
+/**
+ * Herther
+ * 2020/7/8
+ * 业务逻辑接口实现类
+ */
 @Service
 public class UserServiceImpl implements UserService {
 

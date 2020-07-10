@@ -926,3 +926,65 @@ FROM user WHERE id=#{id}
 filterMap.put("/add", "perms[user:add]");
 filterMap.put("/update", "perms[user:update]");
 ```
+
+### 九、thymeleaf和shiro标签整合使用
+
+**pom添加依赖**
+
+```php+HTML
+<!--thymeleaf-extras-shiro依赖-->
+<dependency>
+    <groupId>com.github.theborakompanioni</groupId>
+    <artifactId>thymeleaf-extras-shiro</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+**在shiroConfig类中配置ShiroDialect**
+
+```java
+/**
+ * 配置ShiroDialect，用于thumeleaf和shiro标签配合使用
+ * @return
+ */
+@Bean
+public ShiroDialect getShiroDialect(){
+    return new ShiroDialect();
+}
+```
+
+**在页面上使用shiro的标签**
+
+**测试**
+
+```html
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1 th:text="${username}">
+</h1>
+
+<hr>
+<div shiro:hasPermission="user:add">
+<h2>
+    这是用户添加页面:
+    <a href="add">添加</a>
+</h2>
+</div>
+<div shiro:hasPermission="user:update">
+<h2>
+    这是用户更新页面:
+    <a href="update">更新</a>
+</h2>
+</div>
+</body>
+</html>
+```
+
+# 项目大致学习内容已结束谢谢观看
+

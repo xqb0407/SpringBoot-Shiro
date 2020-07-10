@@ -11,6 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import xyz.herther.pojo.User;
 import xyz.herther.service.UserService;
 
+/**
+ * Herther
+ * 2020/7/8
+ * shiroReaml类 实现授权 验证
+ */
 public class UserReaml extends AuthorizingRealm {
 
 

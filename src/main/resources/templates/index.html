@@ -10,15 +10,17 @@
 </h1>
 
 <hr>
+<div shiro:hasPermission="user:add">
 <h2>
     这是用户添加页面:
     <a href="add">添加</a>
 </h2>
-
+</div>
+<div shiro:hasPermission="user:update">
 <h2>
     这是用户更新页面:
     <a href="update">更新</a>
 </h2>
-
+</div>
 </body>
 </html>
