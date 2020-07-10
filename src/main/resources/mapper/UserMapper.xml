@@ -5,7 +5,17 @@
     <select id="findByName" resultType="xyz.herther.pojo.User" parameterType="string">
     SELECT ID,
         USERNAME,
-        PASSWORD
+        PASSWORD,
+        perms
     FROM user WHERE username=#{username}
+    </select>
+
+    <select id="findById" resultType="xyz.herther.pojo.User" parameterType="int">
+    SELECT
+        ID,
+        USERNAME,
+        PASSWORD,
+        perms
+    FROM user WHERE id=#{id}
     </select>
 </mapper>

@@ -17,4 +17,10 @@ public class UserServiceImpl implements UserService {
         User byName = userMapper.findByName(username);
         return byName;
     }
+
+
+    public User findById(int id) {
+        User byId = userMapper.findById(id);
+        return byId;
+    }
 }

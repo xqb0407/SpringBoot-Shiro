@@ -1,3 +1,5 @@
+
+
 # Shiro学习
 
 ### 一、搭建项目
@@ -789,3 +791,138 @@ protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principal
 }
 ```
 
+**2、数据库动态资源授权**
+
+​	**UserReaml**
+
+```java
+    //获取授权信息
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        System.out.println("获取授权信息");
+        //给资源进行授权
+        SimpleAuthorizationInfo info =new SimpleAuthorizationInfo();
+        //添加字符串权限
+//        动态添加
+        //1、到数据获取权限字符串
+        //2、获取当前用户字符串
+        Subject subject = SecurityUtils.getSubject();
+        User user = (User) subject.getPrincipal();
+        // info.addStringPermission("user:add");
+        User dbUser = userService.findById(user.getId());
+        System.out.println("资源授权层："+dbUser.getPerms());
+        info.addStringPermission(dbUser.getPerms());
+
+        return info;
+    }
+```
+
+**User**
+
+```java
+package xyz.herther.pojo;
+
+public class User {
+    private int id;
+    private String username;
+    private String password;
+    private String perms;
+
+    public User(int id) {
+
+    }
+
+    public User(int id, String username, String password, String perms) {
+
+    }
+
+    public User(String username, String password, String perms) {
+
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPerms() {
+        return perms;
+    }
+
+    public void setPerms(String perms) {
+        this.perms = perms;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", perms='" + perms + '\'' +
+                '}';
+    }
+}
+```
+
+**UserMapper**
+
+```java
+public User findById(@Param("id") int id);//根据ID查询权限
+```
+
+**UserService**
+
+```java
+public User findById(int id);
+```
+
+**UserServiceImpl**
+
+```java
+public User findById(int id) {
+        User byId = userMapper.findById(id);
+        return byId;
+    }
+```
+
+**UserMapper.xml**
+
+```php+HTML
+<select id="findById" resultType="xyz.herther.pojo.User" parameterType="int">
+SELECT
+    ID,
+    USERNAME,
+    PASSWORD,
+    perms
+FROM user WHERE id=#{id}
+</select>
+
+```
+
+**ShiroConfig**
+
+```java
+//add资源必须得到权限才能访问
+filterMap.put("/add", "perms[user:add]");
+filterMap.put("/update", "perms[user:update]");
+```

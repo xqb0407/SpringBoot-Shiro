@@ -40,6 +40,7 @@ public class ShiroConfig {
         filterMap.put("/login", "anon");
         //add资源必须得到权限才能访问
         filterMap.put("/add", "perms[user:add]");
+        filterMap.put("/update", "perms[user:update]");
         //修改登录页面
         filterMap.put("/*","authc");
 

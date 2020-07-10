@@ -12,4 +12,5 @@ import xyz.herther.pojo.User;
 @Repository
 public interface UserMapper {
      public User findByName(@Param("username") String username); //登录
+     public User findById(@Param("id") int id);//根据ID查询权限
 }
